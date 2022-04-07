@@ -55,7 +55,7 @@ class LineTracker:
         image_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR) # OpenCV >= 3.0:
         
         # Slice Camera View
-        vertical_cut = 255
+        vertical_cut = 245
         horizontal_cut = 75
         width = image_np.shape[1]
         height = image_np.shape[0] - vertical_cut
@@ -69,11 +69,11 @@ class LineTracker:
         scaled_offset = offset / scale
         self.last_readings.pop()
         self.last_readings.append(scaled_offset)
-        if x < 0:
+        if x < 0 and (sum(self.last_readings) / 10.0) < 0:
             scaled_offset = 0.0
         elif x < 0 and (sum(self.last_readings) / 10.0) > 0:
             scaled_offset = 0.0
-        if abs(self.last_reading - scaled_offset) > 0.5 and scaled_offset != 0:
+        if abs(self.last_reading - scaled_offset) > 0.3 and scaled_offset != 0:
             scaled_offset = self.last_reading
         self.last_reading = scaled_offset
         

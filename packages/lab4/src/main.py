@@ -18,7 +18,7 @@ LINE_TRACKER_TOPIC = "/csc22912/output/line_tracker"
 STOP_MATCHER_TOPIC = "/csc22912/output/stop_matcher"
 VELOCITY = 0.30
 
-
+43
 class MotorController:
     def __init__(self):
         # self.pub = rospy.Publisher(MOTOR_TOPIC, WheelsCmdStamped, queue_size=10)
@@ -41,7 +41,7 @@ class MotorController:
         rospy.loginfo(f"OMEGA: {msg.omega}")
         self.pub.publish(msg)
         '''
-        rospy.loginfo(f"Angular Velocity: {angularVelocity}")
+        # rospy.loginfo(f"Angular Velocity: {angularVelocity}")
         max_angular_velocity = 0.55
         if abs(angularVelocity) < 0.20:
             angularVelocity *= 1.5
@@ -102,8 +102,9 @@ class StopDetector:
             return self.matches
     
     def stop_sign_detected(self):
-        # rospy.loginfo(f"MATCHES: {self.get_matches()}")
-        return self.get_matches() > 4
+        matches = self.get_matches()
+        rospy.loginfo(f"MATCHES: {matches}")
+        return matches > 6
 
 
 class State(smach.State):
@@ -135,6 +136,8 @@ class FollowPath(State):
         State.__init__(self, motor_publisher, line_tracker, stop_matcher, outcomes=["stop"])
 
     def execute(self, ud):
+        while self.track_line() == 0:
+            self.rate.sleep()
         while not self.is_stop_sign():
             self.drive(VELOCITY, self.track_line())
             self.rate.sleep()
@@ -147,7 +150,7 @@ class Stop(State):
 
     def execute(self, ud):
         t = time.time()
-        while (time.time() - t) < 2:
+        while (time.time() - t) < 1:
             self.drive(VELOCITY, self.track_line())
             self.rate.sleep()
         self.stop()
@@ -172,7 +175,6 @@ class MyPublisherNode(DTROS):
             smach.StateMachine.add('STOP', Stop(motor_controller, line_tracker, stop_matcher), transitions={'finish':'FINISH'})
     
         # Execute SMACH plan
-        rospy.sleep(2)
         outcome = sm.execute()
 
 

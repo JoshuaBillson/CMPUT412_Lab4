@@ -91,7 +91,7 @@ class StopMatcher:
 
         # If Debug Is True, Show The Bounding Boxes And Log The Matches
         if self.debug:
-            rospy.loginfo(matches)
+            #rospy.loginfo(matches)
             msg = CompressedImage()
             msg.header.stamp = rospy.Time.now()
             msg.format = "jpeg"
